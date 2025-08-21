@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Competencias Digitales para Docentes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js CDN -->
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #1e3a8a; /* Dark blue */
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem; /* Adjust to extend */
+            position: relative;
+            overflow: hidden; /* Ensures image doesn't spill out */
+        }
+        .header img {
+            width: 100%;
+            height: 180px; /* Fixed height for the banner image */
+            object-fit: cover; /* Ensures the image covers the area, cropping if necessary */
+            margin-bottom: 1rem;
+            border-radius: 8px; /* Slightly rounded corners for the image */
+        }
+        .header-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            background-color: rgba(30, 58, 138, 0.7); /* Semi-transparent background for text */
+            box-sizing: border-box;
+            border-radius: 0 0 10px 10px; /* Rounded bottom corners */
+        }
+        .header-content h1:first-child {
+            font-size: 2.5rem; /* Larger for the main institution title */
+            font-weight: 700;
+            margin-bottom: 0.5rem; /* Space between main title and sub-title */
+            line-height: 1.1;
+        }
+        .question-card {
+            background-color: #f9fafb;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            border: 1px solid #cbd5e0;
+            margin-bottom: 0.5rem;
+        }
+        .radio-label:hover {
+            background-color: #edf2f7;
+            border-color: #a0aec0;
+        }
+        .radio-label input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: #1e3a8a; /* Dark blue */
+        }
+        .radio-label input[type="radio"]:checked {
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.3);
+        }
+        .button-primary {
+            background-color: #1e3a8a; /* Dark blue */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            border: none;
+        }
+        .button-primary:hover {
+            background-color: #1e40af; /* Slightly darker on hover */
+            transform: translateY(-1px);
+        }
+        .button-primary:active {
+            transform: translateY(0);
+        }
+        .button-download {
+            background-color: #dc2626; /* Red color */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            border: none;
+            animation: pulse-slow 2s infinite; /* Slow blinking effect */
+        }
+        .button-download:hover {
+            background-color: #ef4444; /* Lighter red on hover */
+            transform: translateY(-1px);
+        }
+        .button-download:active {
+            transform: translateY(0);
+        }
+        .button-pdf {
+            background-color: #1d4ed8; /* A nice blue for PDF button */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.2s, transform 0.1s;
+            cursor: pointer;
+            border: none;
+        }
+        .button-pdf:hover {
+            background-color: #2563eb;
+            transform: translateY(-1px);
+        }
+        @keyframes pulse-slow {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .result-section {
+            background-color: #e0f2fe; /* Light blue */
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            border: 1px solid #90cdf4;
+        }
+        .result-area {
+            background-color: #ffffff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .level-badge {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-size: 0.8em;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+        .level-A1 { background-color: #fee2e2; color: #ef4444; } /* Novel - Light Red */
+        .level-A2 { background-color: #ffedd5; color: #f97316; } /* Explorer - Light Orange */
+        .level-B1 { background-color: #fef9c3; color: #eab308; } /* Integrator - Light Yellow */
+        .level-B2 { background-color: #dcfce7; color: #22c55e; } /* Expert - Light Green */
+        .level-C1 { background-color: #dbeafe; color: #3b82f6; } /* Leader - Light Blue */
+        .level-C2 { background-color: #ede9fe; color: #8b5cf6; } /* Pioneer - Light Purple */
+
+        .highlight-result-box {
+            background-color: #fffacd; /* Soft yellow background */
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid #dc2626; /* Red border */
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Make canvas responsive for bar chart */
+        #digCompEduBarChart {
+            max-width: 100%;
+            height: 400px; /* Adjust height as needed for bar chart */
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #1e3a8a;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .ai-suggestions-section {
+            background-color: #f0fdf4; /* Light green for AI section */
+            padding: 1.25rem;
+            border-radius: 10px;
+            margin-top: 1.5rem;
+            border: 1px solid #6ee7b7;
+        }
+        .ai-suggestion-card {
+            background-color: #ffffff;
+            border: 1px solid #d1fae5;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .results-table-container {
+            margin-top: 1.5rem;
+            overflow-x: auto; /* Enable horizontal scrolling for small screens */
+            display: none; /* Hide the table from display */
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        .results-table th {
+            background-color: #e0f2fe;
+            font-weight: 600;
+            color: #2c5282;
+        }
+        .results-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .results-table tbody tr:hover {
+            background-color: #edf2f7;
+        }
+        .highlight-missing {
+            border: 2px solid #f97316 !important; /* Orange color */
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3) !important;
+        }
+
+        /* Area specific background colors */
+        #user-info-section { background-color: #f0f8ff; /* Alice Blue */ }
+        #area-1 { background-color: #fdf6e3; /* Light Yellow-Orange */ }
+        #area-2 { background-color: #e6f7ff; /* Light Cyan */ }
+        #area-3 { background-color: #f8f8f8; /* Very Light Gray */ }
+        #area-4 { background-color: #e8f5e9; /* Light Green */ }
+        #area-5 { background-color: #fff3e0; /* Light Orange */ }
+        #area-6 { background-color: #f3e5f5; /* Light Purple */ }
+    </style>
+</head>
+<body class="p-4">
+    <div class="container">
+        <!-- The institutional title is now inside the header-content for better integration -->
+
+        <div class="header">
+            <img src="https://cielo24.com/wp-content/uploads/2020/06/How-to-Make-Out-of-This-World-e-Learning-Program-scaled.jpeg" alt="" onerror="this.onerror=null;this.src='https://placehold.co/900x180/1e3a8a/ffffff?text=Imagen+Educativa';" class="mb-4">
+            <div class="header-content">
+                <h1>UEF. Don Bosco – Macas</h1>
+                <h2 class="text-2xl font-bold mb-2">Test de Autoevaluación de Competencias Digitales para Docentes</h2>
+            </div>
+        </div>
+
+        <form id="digcompedu-test-form">
+            <!-- User Information Section -->
+            <div class="mb-6 question-card" id="user-info-section">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Información del Docente</h2>
+                <div class="mb-4">
+                    <label for="teacher-name" class="block text-gray-700 text-sm font-bold mb-2">Nombre y Apellido:</label>
+                    <input type="text" id="teacher-name" name="teacher-name" placeholder="Ej. Juan Pérez" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-4">
+                    <label for="sede-select" class="block text-gray-700 text-sm font-bold mb-2">Sede a la que pertenece:</label>
+                    <select id="sede-select" name="sede-select" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Seleccione una Sede</option>
+                        <option value="Sede Norte">Sede Norte</option>
+                        <option value="Sede Sur">Sede Sur</option>
+                        <option value="Sede Centro">Sede Centro</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="nivel-area-select" class="block text-gray-700 text-sm font-bold mb-2">Nivel o Área a la que pertenece:</label>
+                    <select id="nivel-area-select" name="nivel-area-select" class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">Seleccione un Nivel/Área</option>
+                        <option value="Inicial">Inicial</option>
+                        <option value="Preparatoria">Preparatoria</option>
+                        <option value="Elemental">Elemental</option>
+                        <option value="Area Ciencias Sociales">Área Ciencias Sociales</option>
+                        <option value="Area Ciencias Naturales">Área Ciencias Naturales</option>
+                        <option value="Area Matematica">Área Matemática</option>
+                        <option value="Area Lengua Extranjera">Área Lengua Extranjera</option>
+                        <option value="Area Educacion Fisica">Área Educación Física</option>
+                        <option value="Area Lengua y Literatura">Área Lengua y Literatura</option>
+                        <option value="Area Religion">Área Religión</option>
+                        <option value="Area Interdisciplinar">Área Interdisciplinar</option>
+                        <option value="Area E.C.A.">Área E.C.A.</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Área 1: Compromiso profesional -->
+            <div class="mb-6 question-card" id="area-1">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">🤝 Área 1: Compromiso profesional</h2>
+                <p class="text-gray-600 mb-4">Uso de las tecnologías digitales para la comunicación, la colaboración y el desarrollo profesional.</p>
+
+                <div class="question-card" data-question-id="1.1">
+                    <p class="font-medium text-lg mb-3">1.1 Comunicación organizativa: ¿Con qué frecuencia utilizas tecnologías digitales para mejorar la comunicación con estudiantes, padres y compañeros?</p>
+                    <label class="radio-label"><input type="radio" name="q1_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="1.2">
+                    <p class="font-medium text-lg mb-3">1.2 Colaboración profesional: ¿Con qué frecuencia utilizas las tecnologías digitales para colaborar con otros educadores?</p>
+                    <label class="radio-label"><input type="radio" name="q1_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="1.3">
+                    <p class="font-medium text-lg mb-3">1.3 Práctica reflexiva: ¿Con qué frecuencia utilizas las tecnologías digitales para reflexionar y mejorar tu práctica pedagógica?</p>
+                    <label class="radio-label"><input type="radio" name="q1_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                 <div class="question-card" data-question-id="1.4">
+                    <p class="font-medium text-lg mb-3">1.4 Desarrollo profesional continuo (DPC) a través de medios digitales: ¿Con qué frecuencia utilizas los medios digitales para tu desarrollo profesional continuo?</p>
+                    <label class="radio-label"><input type="radio" name="q1_4" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_4" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_4" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_4" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q1_4" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <!-- Área 2: Contenidos digitales -->
+            <div class="mb-6 question-card" id="area-2">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">✍️ Área 2: Contenidos digitales</h2>
+                <p class="text-gray-600 mb-4">Búsqueda, creación e intercambio de contenidos digitales.</p>
+
+                <div class="question-card" data-question-id="2.1">
+                    <p class="font-medium text-lg mb-3">2.1 Selección de recursos digitales: ¿Con qué frecuencia seleccionas recursos digitales para la enseñanza y el aprendizaje?</p>
+                    <label class="radio-label"><input type="radio" name="q2_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="2.2">
+                    <p class="font-medium text-lg mb-3">2.2 Creación y modificación de recursos digitales: ¿Con qué frecuencia creas o modificas recursos digitales para tus clases?</p>
+                    <label class="radio-label"><input type="radio" name="q2_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="2.3">
+                    <p class="font-medium text-lg mb-3">2.3 Protección, gestión e intercambio de contenidos digitales: ¿Con qué frecuencia gestionas y compartes contenidos digitales de forma segura y responsable?</p>
+                    <label class="radio-label"><input type="radio" name="q2_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q2_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <!-- Área 3: Enseñanza y aprendizaje -->
+            <div class="mb-6 question-card" id="area-3">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">💡 Área 3: Enseñanza y aprendizaje</h2>
+                <p class="text-gray-600 mb-4">Gestión y organización del uso de las tecnologías digitales en la enseñanza y el aprendizaje.</p>
+
+                <div class="question-card" data-question-id="3.1">
+                    <p class="font-medium text-lg mb-3">3.1 Enseñanza: ¿Con qué frecuencia programas e implementas el uso de tecnologías digitales en tu docencia?</p>
+                    <label class="radio-label"><input type="radio" name="q3_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="3.2">
+                    <p class="font-medium text-lg mb-3">3.2 Orientación y apoyo en el aprendizaje: ¿Con qué frecuencia utilizas las tecnologías digitales para orientar y apoyar a tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q3_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="3.3">
+                    <p class="font-medium text-lg mb-3">3.3 Aprendizaje colaborativo: ¿Con qué frecuencia utilizas las tecnologías digitales para fomentar el aprendizaje colaborativo?</p>
+                    <label class="radio-label"><input type="radio" name="q3_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="3.4">
+                    <p class="font-medium text-lg mb-3">3.4 Aprendizaje autorregulado: ¿Con qué frecuencia utilizas las tecnologías digitales para favorecer el aprendizaje autorregulado en tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q3_4" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_4" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_4" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_4" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q3_4" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <!-- Área 4: Evaluación y retroalimentación -->
+            <div class="mb-6 question-card" id="area-4">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">📊 Área 4: Evaluación y retroalimentación</h2>
+                <p class="text-gray-600 mb-4">Utilización de tecnologías y estrategias digitales para mejorar la evaluación.</p>
+
+                <div class="question-card" data-question-id="4.1">
+                    <p class="font-medium text-lg mb-3">4.1 Estrategias de evaluación: ¿Con qué frecuencia utilizas las tecnologías digitales para tus estrategias de evaluación?</p>
+                    <label class="radio-label"><input type="radio" name="q4_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="4.2">
+                    <p class="font-medium text-lg mb-3">4.2 Analíticas de aprendizaje: ¿Con qué frecuencia utilizas los datos digitales sobre la actividad y el rendimiento de tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q4_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="4.3">
+                    <p class="font-medium text-lg mb-3">4.3 Retroalimentación, programación y toma de decisiones: ¿Con qué frecuencia utilizas las tecnologías digitales para proporcionar retroalimentación y adaptar tus estrategias?</p>
+                    <label class="radio-label"><input type="radio" name="q4_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q4_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <!-- Área 5: Empoderamiento de los estudiantes -->
+            <div class="mb-6 question-card" id="area-5">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">✊ Área 5: Empoderamiento de los estudiantes</h2>
+                <p class="text-gray-600 mb-4">Uso de las tecnologías digitales para mejorar la inclusión, la personalización y el compromiso activo del alumnado con su propio aprendizaje.</p>
+
+                <div class="question-card" data-question-id="5.1">
+                    <p class="font-medium text-lg mb-3">5.1 Accesibilidad e inclusión: ¿Con qué frecuencia garantizas la accesibilidad e inclusión al usar tecnologías digitales en tus clases?</p>
+                    <label class="radio-label"><input type="radio" name="q5_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="5.2">
+                    <p class="font-medium text-lg mb-3">5.2 Personalización: ¿Con qué frecuencia utilizas las tecnologías digitales para personalizar el aprendizaje de tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q5_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="5.3">
+                    <p class="font-medium text-lg mb-3">5.3 Compromiso activo de los estudiantes con su propio aprendizaje: ¿Con qué frecuencia utilizas las tecnologías digitales para promover el compromiso activo de tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q5_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q5_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <!-- Área 6: Desarrollo de la competencia digital de los estudiantes -->
+            <div class="mb-6 question-card" id="area-6">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">💻 Área 6: Desarrollo de la competencia digital de los estudiantes</h2>
+                <p class="text-gray-600 mb-4">Capacitación de los estudiantes para utilizar de forma creativa y responsable las tecnologías digitales para la información, la comunicación, la creación de contenidos, el bienestar y la resolución de problemas.</p>
+
+                <div class="question-card" data-question-id="6.1">
+                    <p class="font-medium text-lg mb-3">6.1 Información y alfabetización mediática: ¿Con qué frecuencia fomentas la alfabetización mediática y de la información en tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q6_1" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_1" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_1" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_1" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_1" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="6.2">
+                    <p class="font-medium text-lg mb-3">6.2 Comunicación y colaboración digital: ¿Con qué frecuencia promueves la comunicación y colaboración digital en tus estudiantes?</p>
+                    <label class="radio-label"><input type="radio" name="q6_2" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_2" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_2" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_2" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_2" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="6.3">
+                    <p class="font-medium text-lg mb-3">6.3 Creación de contenido digital: ¿Con qué frecuencia incluyes actividades que requieran a los estudiantes crear y modificar contenido digital?</p>
+                    <label class="radio-label"><input type="radio" name="q6_3" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_3" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_3" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_3" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_3" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="6.4">
+                    <p class="font-medium text-lg mb-3">6.4 Uso responsable: ¿Con qué frecuencia capacitas a tus estudiantes para un uso responsable y seguro de las tecnologías digitales?</p>
+                    <label class="radio-label"><input type="radio" name="q6_4" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_4" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_4" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_4" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_4" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+
+                <div class="question-card" data-question-id="6.5">
+                    <p class="font-medium text-lg mb-3">6.5 Resolución de problemas digitales: ¿Con qué frecuencia promueves que tus estudiantes identifiquen y resuelvan problemas técnicos o transfieran conocimientos tecnológicos?</p>
+                    <label class="radio-label"><input type="radio" name="q6_5" value="1" class="mr-2"><span>1 - Nunca / No lo sé hacer</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_5" value="2" class="mr-2"><span>2 - Pocas veces / Con dificultad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_5" value="3" class="mr-2"><span>3 - A veces / Con cierta soltura</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_5" value="4" class="mr-2"><span>4 - Frecuentemente / Con facilidad</span></label>
+                    <label class="radio-label"><input type="radio" name="q6_5" value="5" class="mr-2"><span>5 - Siempre / Puedo guiar a otros</span></label>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button type="submit" class="button-primary">Calcular mi Nivel de Competencias Digitales</button>
+            </div>
+        </form>
+
+        <div id="results" class="result-section hidden">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800 text-center">Tus Resultados de Competencias Digitales</h2>
+            <p class="mb-4 text-gray-700">Aquí tienes un resumen de tu nivel en cada área, basado en tus respuestas:</p>
+
+            <div class="mb-6 flex justify-center">
+                <canvas id="digCompEduBarChart"></canvas>
+            </div>
+
+            <!-- New section for Level Explanation -->
+            <div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h3 class="text-xl font-semibold mb-3 text-gray-800">Comprensión de los Niveles de Competencia:</h3>
+                <ul class="list-disc list-inside text-gray-700">
+                    <li><span class="font-bold">Nivel 1 (A1 - Novel):</span> Sensibilización, incertidumbre, uso básico.</li>
+                    <li><span class="font-bold">Nivel 2 (A2 - Explorador):</span> Sondeo de las opciones digitales, desarrollo de la práctica profesional.</li>
+                    <li><span class="font-bold">Nivel 3 (B1 - Integrador):</span> Adaptación de los recursos digitales al contexto de aprendizaje, mejora de la práctica profesional.</li>
+                    <li><span class="font-bold">Nivel 4 (B2 - Experto):</span> Uso estratégico de recursos interactivos, debate y renovación de la práctica profesional.</li>
+                    <li><span class="font-bold">Nivel 5 (C1 - Líder):</span> Uso integral de estrategias y recursos avanzados, fomento del uso de los recursos digitales, innovación de la práctica profesional.</li>
+                    <li><span class="font-bold">Nivel 6 (C2 - Pionero):</span> Crítica, renovación, fomento integral y crítico de la competencia digital del alumnado, uso de formatos innovadores para fomentar la competencia digital del alumnado.</li>
+                </ul>
+            </div>
+
+            <div id="area-results"></div>
+
+            <!-- Highlighted section for Overall Competence Level -->
+            <div class="highlight-result-box">
+                <h3 class="text-xl font-semibold mt-0 mb-2 text-gray-800">Su Nivel De Competencia Digital es: <span id="overall-level" class="font-bold"></span></h3>
+                <p id="overall-interpretation" class="text-gray-700 mb-0"></p>
+            </div>
+
+
+            <h3 class="text-xl font-semibold mt-6 mb-3 text-gray-800">Sugerencias para su Desarrollo Profesional:</h3>
+            <ul id="suggestions-list" class="list-disc list-inside text-gray-700"></ul>
+
+            <div class="flex justify-center mt-6 flex-wrap gap-4">
+                <button id="download-pdf-button" class="button-pdf">Descargar Informe (PDF) 📄</button>
+                <button id="download-csv-button" class="button-download">Descargar Resultados (CSV)</button>
+                <button id="generate-ai-suggestions" class="button-primary">Generar Planes de Desarrollo Personalizado ✨</button>
+            </div>
+
+            <div id="ai-suggestions-output" class="ai-suggestions-section hidden">
+                <h3 id="ai-suggestions-title" class="text-xl font-semibold mb-3 text-gray-800"></h3>
+                <div id="ai-suggestions-list">
+                    <p class="text-gray-600">Haz clic en "Generar Planes de Desarrollo Personalizado ✨" para obtener sugerencias.</p>
+                </div>
+                <div id="ai-loading-spinner" class="mt-4 text-center hidden">
+                    <div class="spinner"></div>
+                    <span class="text-gray-700">Generando sugerencias con IA...</span>
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button id="download-ai-plan-button" class="button-download">Descargar Plan de Desarrollo (TXT)</button>
+                </div>
+            </div>
+
+            <button onclick="resetForm()" class="button-primary mt-6">Volver a hacer el test</button>
+        </div>
+    </div>
+
+    <!-- Modal para cuando no se han respondido todas las preguntas -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h3 class="text-xl font-semibold mb-3 text-red-600">Atención: Preguntas Incompletas</h3>
+            <p id="missing-questions-list" class="mb-4">Por favor, asegúrate de responder todas las preguntas antes de calcular tus resultados:</p>
+            <div class="flex justify-center mt-4">
+                 <button onclick="closeModal()" class="button-primary">Entendido</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('digcompedu-test-form');
+        const resultsDiv = document.getElementById('results');
+        const areaResultsDiv = document.getElementById('area-results');
+        const overallLevelSpan = document.getElementById('overall-level');
+        const overallInterpretationP = document.getElementById('overall-interpretation');
+        const suggestionsList = document.getElementById('suggestions-list');
+        const warningModal = document.getElementById('warningModal');
+        const missingQuestionsListModal = document.getElementById('missing-questions-list');
+        const generateAiSuggestionsButton = document.getElementById('generate-ai-suggestions');
+        const aiSuggestionsOutput = document.getElementById('ai-suggestions-output');
+        const aiSuggestionsList = document.getElementById('ai-suggestions-list');
+        const aiLoadingSpinner = document.getElementById('ai-loading-spinner');
+        const downloadCsvButton = document.getElementById('download-csv-button');
+        const downloadPdfButton = document.getElementById('download-pdf-button');
+        const downloadAiPlanButton = document.getElementById('download-ai-plan-button');
+        const aiSuggestionsTitle = document.getElementById('ai-suggestions-title');
+
+        const teacherNameInput = document.getElementById('teacher-name');
+        const sedeSelect = document.getElementById('sede-select');
+        const nivelAreaSelect = document.getElementById('nivel-area-select');
+        const userInfoSection = document.getElementById('user-info-section');
+
+        // Chart.js instance
+        let digCompEduChart;
+        let currentAreaNumericalScores = {};
+        let finalOverallResult = {};
+        let currentTeacherInfo = {};
+        let lastGeneratedAiPlan = '';
+
+        const levelDescriptions = {
+            'A1': 'Novel (Sensibilización, incertidumbre, uso básico)',
+            'A2': 'Explorador (Sondeo de las opciones digitales, desarrollo de la práctica profesional)',
+            'B1': 'Integrador (Adaptación de los recursos digitales al contexto de aprendizaje, mejora de la práctica profesional)',
+            'B2': 'Experto (Uso estratégico de recursos interactivos, debate y renovación de la práctica profesional)',
+            'C1': 'Líder (Uso integral de estrategias y recursos avanzados, fomento del uso de los recursos digitales, innovación de la práctica profesional)',
+            'C2': 'Pionero (Crítica, renovación, fomento integral y crítico de la competencia digital del alumnado, uso de formatos innovadores para fomentar la competencia digital del alumnado)'
+        };
+
+        const areaSpecificSuggestions = {
+            'A1': (area) => `En el área de "${area}", tu nivel es básico. Te sugiero explorar más las herramientas y conceptos fundamentales relacionados con esta área. Un buen punto de partida sería buscar tutoriales introductorios o unirte a un grupo de estudio.`,
+            'A2': (area) => `En el área de "${area}", estás empezando a explorar. Intenta aplicar más activamente las tecnologías digitales en situaciones reales. Colaborar con colegas más experimentados podría ser muy beneficioso.`,
+            'B1': (area) => `En el área de "${area}", eres un integrador. Busca comprender mejor qué herramientas funcionan mejor en qué situaciones y cómo adaptar las tecnologías a diferentes métodos pedagógicos. La experimentación es clave.`,
+            'B2': (area) => `En el área de "${area}", eres un experto. Continúa experimentando para ampliar y consolidar tu repertorio de estrategias digitales. Considera compartir tus conocimientos con otros colegas menos experimentados.`,
+            'C1': (area) => `En el área de "${area}", eres un líder. Mantente actualizado sobre nuevos desarrollos e ideas. Busca oportunidades para inspirar y transmitir tu experiencia a otros docentes.`,
+            'C2': (area) => `En el área de "${area}", eres un pionero. Sigue cuestionando las prácticas existentes y buscando la innovación. Documenta tus enfoques novedosos y comparte tus hallazgos con la comunidad educativa para liderar el cambio.`
+        };
+
+        const overallInterpretation = {
+            'A1': 'Tu nivel general sugiere que estás en las primeras etapas de tu competencia digital. Es un buen momento para sentar las bases y explorar cómo las herramientas digitales pueden mejorar tu práctica diaria.',
+            'A2': 'Has comenzado a explorar el potencial de las tecnologías digitales. Te animamos a seguir experimentando y a buscar inspiración en otros para ampliar tus habilidades.',
+            'B1': 'Estás integrando las tecnologías digitales en muchas de tus prácticas. Continúa profundizando en tu comprensión y adaptación de las herramientas a tus estrategias pedagógicas.',
+            'B2': 'Utilizas las tecnologías digitales con confianza y de forma crítica. Eres un activo importante para tu centro. Sigue experimentando y compartiendo tu experiencia.',
+            'C1': 'Tienes un enfoque consistente e integral del uso de las tecnologías digitales. Eres una fuente de inspiración y un referente para tus colegas. Considera liderar iniciativas de formación.',
+            'C2': 'Estás a la vanguardia de la innovación en educación digital. Tu capacidad para desarrollar nuevos enfoques es excepcional. Continúa investigando y compartiendo tus descubrimientos para influir en la política educativa.'
+        };
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const responses = {};
+            const unansweredQuestions = [];
+
+            removeHighlights();
+
+            currentTeacherInfo = {
+                name: teacherNameInput.value.trim(),
+                sede: sedeSelect.value,
+                nivelArea: nivelAreaSelect.value
+            };
+
+            if (currentTeacherInfo.name === "") {
+                unansweredQuestions.push("Nombre y Apellido");
+                teacherNameInput.classList.add('highlight-missing');
+            }
+            if (currentTeacherInfo.sede === "") {
+                unansweredQuestions.push("Sede");
+                sedeSelect.classList.add('highlight-missing');
+            }
+            if (currentTeacherInfo.nivelArea === "") {
+                unansweredQuestions.push("Nivel o Área");
+                nivelAreaSelect.classList.add('highlight-missing');
+            }
+
+            const allQuestionCards = document.querySelectorAll('.question-card[data-question-id]');
+            allQuestionCards.forEach(card => {
+                const questionId = card.dataset.questionId;
+                const radios = card.querySelectorAll(`input[name="q${questionId.replace('.', '_')}"]`);
+                let answered = false;
+                radios.forEach(radio => {
+                    if (radio.checked) {
+                        responses[radio.name] = parseInt(radio.value);
+                        answered = true;
+                    }
+                });
+                if (!answered) {
+                    unansweredQuestions.push(`Pregunta ${questionId}`);
+                    card.classList.add('highlight-missing');
+                }
+            });
+
+            if (unansweredQuestions.length > 0) {
+                showModal(unansweredQuestions);
+                return;
+            }
+
+            calculateResults(responses);
+            resultsDiv.classList.remove('hidden');
+            aiSuggestionsOutput.classList.add('hidden');
+            aiSuggestionsList.innerHTML = '<p class="text-gray-600">Haz clic en "Generar Planes de Desarrollo Personalizado ✨" para obtener sugerencias.</p>';
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            generateAiSuggestionsButton.textContent = `Generar Plan de ${currentTeacherInfo.name.toUpperCase()} ✨`;
+        });
+
+        function calculateResults(responses) {
+            const areaScores = {
+                'Área 1: Compromiso profesional': [],
+                'Área 2: Contenidos digitales': [],
+                'Área 3: Enseñanza y aprendizaje': [],
+                'Área 4: Evaluación y retroalimentación': [],
+                'Área 5: Empoderamiento de los estudiantes': [],
+                'Área 6: Desarrollo de la competencia digital de los estudiantes': []
+            };
+
+            const mapScoreToDigCompEduLevel = (score) => {
+                if (score >= 1.0 && score <= 1.5) return 'A1';
+                if (score > 1.5 && score <= 2.5) return 'A2';
+                if (score > 2.5 && score <= 3.5) return 'B1';
+                if (score > 3.5 && score <= 4.0) return 'B2';
+                if (score > 4.0 && score <= 4.5) return 'C1';
+                if (score > 4.5 && score <= 5.0) return 'C2';
+                return 'N/A';
+            };
+
+            for (const key in responses) {
+                const value = responses[key];
+                if (key.startsWith('q1')) areaScores['Área 1: Compromiso profesional'].push(value);
+                else if (key.startsWith('q2')) areaScores['Área 2: Contenidos digitales'].push(value);
+                else if (key.startsWith('q3')) areaScores['Área 3: Enseñanza y aprendizaje'].push(value);
+                else if (key.startsWith('q4')) areaScores['Área 4: Evaluación y retroalimentación'].push(value);
+                else if (key.startsWith('q5')) areaScores['Área 5: Empoderamiento de los estudiantes'].push(value);
+                else if (key.startsWith('q6')) areaScores['Área 6: Desarrollo de la competencia digital de los estudiantes'].push(value);
+            }
+
+            areaResultsDiv.innerHTML = '';
+            let overallNumericalScores = [];
+            const chartLabels = [];
+            const chartData = [];
+            currentAreaNumericalScores = {};
+
+            for (const area in areaScores) {
+                if (areaScores[area].length > 0) {
+                    const sumScores = areaScores[area].reduce((sum, score) => sum + score, 0);
+                    const averageNumericalScore = sumScores / areaScores[area].length;
+                    const digCompEduLevel = mapScoreToDigCompEduLevel(averageNumericalScore);
+                    const numericalScoreForChart = parseFloat(averageNumericalScore.toFixed(1));
+
+                    overallNumericalScores.push(numericalScoreForChart);
+                    chartLabels.push(area.split(': ')[1]);
+                    chartData.push(numericalScoreForChart);
+                    currentAreaNumericalScores[area] = { level: digCompEduLevel, score: numericalScoreForChart };
+
+                    const resultHtml = `
+                        <div class="result-area">
+                            <h4 class="font-semibold text-lg text-gray-800">${area}:
+                                <span class="level-badge level-${digCompEduLevel}">${digCompEduLevel} - ${levelDescriptions[digCompEduLevel].split(' ')[0]}</span>
+                                <span class="font-bold ml-2 text-blue-800">Puntaje Promedio: ${numericalScoreForChart}/5</span>
+                            </h4>
+                            <p class="text-gray-600 mt-1">${levelDescriptions[digCompEduLevel]}</p>
+                            <p class="text-gray-700 mt-2">${areaSpecificSuggestions[digCompEduLevel](area.split(':')[0])}</p>
+                        </div>
+                    `;
+                    areaResultsDiv.innerHTML += resultHtml;
+                }
+            }
+
+            const ctx = document.getElementById('digCompEduBarChart').getContext('2d');
+            if (digCompEduChart) {
+                digCompEduChart.destroy();
+            }
+            digCompEduChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Tu Nivel de Competencia (Puntaje Promedio 1-5)',
+                        data: chartData,
+                        backgroundColor: [
+                            'rgba(30, 58, 138, 0.7)', 'rgba(49, 130, 206, 0.7)', 'rgba(99, 179, 237, 0.7)',
+                            'rgba(144, 202, 249, 0.7)', 'rgba(191, 219, 254, 0.7)', 'rgba(219, 234, 254, 0.7)'
+                        ],
+                        borderColor: ['#1e3a8a', '#3182ce', '#63b3ed', '#90cdf4', '#bfdbfe', '#dbeafe'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 0.5,
+                                color: '#555',
+                                callback: function(value) {
+                                    return `${mapScoreToDigCompEduLevel(value)} (${value.toFixed(1)})`;
+                                }
+                            },
+                            title: { display: true, text: 'Nivel de Competencia (Promedio 1-5)', color: '#333', font: { size: 16, weight: 'bold' } }
+                        },
+                        x: {
+                            ticks: { color: '#333', font: { size: 12 } },
+                            title: { display: true, text: 'Áreas de Competencia Digital', color: '#333', font: { size: 16, weight: 'bold' } }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const areaName = context.label;
+                                    const numericalScore = context.raw;
+                                    const level = mapScoreToDigCompEduLevel(numericalScore);
+                                    return `${areaName}: Nivel ${level} (Puntaje Promedio ${numericalScore.toFixed(1)}/5)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            let finalOverallNumericalScore = 0;
+            if (overallNumericalScores.length > 0) {
+                const sumOverallScores = overallNumericalScores.reduce((sum, score) => sum + score, 0);
+                finalOverallNumericalScore = sumOverallScores / overallNumericalScores.length;
+            }
+            const finalOverallLevel = mapScoreToDigCompEduLevel(finalOverallNumericalScore);
+            
+            finalOverallResult = { level: finalOverallLevel, score: finalOverallNumericalScore };
+
+            overallLevelSpan.textContent = `${finalOverallLevel} - ${levelDescriptions[finalOverallLevel].split(' ')[0]}`;
+            overallLevelSpan.className = `font-bold level-badge level-${finalOverallLevel}`;
+            overallInterpretationP.textContent = overallInterpretation[finalOverallLevel];
+
+            suggestionsList.innerHTML = `
+                <li>Familiarízate con las herramientas digitales esenciales para tu rol.</li>
+                <li>Participa en cursos o talleres sobre las áreas donde identificaste menor competencia.</li>
+                <li>Busca mentores o colegas con mayor experiencia para aprender de ellos.</li>
+                <li>Experimenta con nuevas tecnologías y enfoques pedagógicos en tu aula.</li>
+                <li>Únete a comunidades profesionales en línea para compartir experiencias y recursos.</li>
+                <li>Reflexiona constantemente sobre tu práctica y busca oportunidades de mejora.</li>
+                <li>Considera cómo puedes adaptar y aplicar lo aprendido a tu contexto escolar específico.</li>
+            `;
+        }
+
+        function escapeCsv(value) {
+            if (value === null || value === undefined) return '';
+            value = String(value);
+            if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+                value = '"' + value.replace(/"/g, '""') + '"';
+            }
+            return value;
+        }
+
+        downloadCsvButton.addEventListener('click', function() {
+            const csvRows = [];
+            csvRows.push('"Nombre y Apellido","Sede","Nivel/Área","Área de Competencia","Nivel DigCompEdu","Puntaje Promedio (1-5)"');
+
+            for (const areaName in currentAreaNumericalScores) {
+                const { level, score } = currentAreaNumericalScores[areaName];
+                csvRows.push(`"${escapeCsv(currentTeacherInfo.name)}","${escapeCsv(currentTeacherInfo.sede)}","${escapeCsv(currentTeacherInfo.nivelArea)}","${escapeCsv(areaName)}","${escapeCsv(level)} - ${escapeCsv(levelDescriptions[level].split(' ')[0])}","${escapeCsv(score.toFixed(1))}"`);
+            }
+
+            csvRows.push(`"${escapeCsv(currentTeacherInfo.name)}","${escapeCsv(currentTeacherInfo.sede)}","${escapeCsv(currentTeacherInfo.nivelArea)}","Su Nivel De Competencia Digital General es","${escapeCsv(finalOverallResult.level)} - ${escapeCsv(levelDescriptions[finalOverallResult.level].split(' ')[0])}","${escapeCsv(finalOverallResult.score.toFixed(1))}"`);
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const fileName = currentTeacherInfo.name.trim().toLowerCase().replace(/\s+/g, '_');
+            link.setAttribute('download', `resultados_test_${fileName}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // --- PDF Export Functionality ---
+        downloadPdfButton.addEventListener('click', function() {
+            const { jsPDF } = window.jspdf;
+            const resultsSection = document.getElementById('results');
+            const originalButtonText = downloadPdfButton.innerHTML;
+            downloadPdfButton.innerHTML = '<div class="spinner"></div>Generando...';
+            downloadPdfButton.disabled = true;
+
+            html2canvas(resultsSection, {
+                scale: 2, // Higher scale for better quality
+                useCORS: true,
+                logging: false,
+                onclone: (document) => {
+                    // Hide download buttons in the clone to not include them in the PDF
+                    const buttonsToHide = document.querySelectorAll('.button-pdf, .button-download, .button-primary');
+                    buttonsToHide.forEach(btn => btn.style.visibility = 'hidden');
+                }
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const ratio = canvasWidth / canvasHeight;
+                const imgWidth = pdfWidth;
+                const imgHeight = imgWidth / ratio;
+
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pdfHeight;
+                }
+
+                const fileName = currentTeacherInfo.name.trim().toLowerCase().replace(/\s+/g, '_');
+                pdf.save(`informe_competencias_${fileName}.pdf`);
+                
+                downloadPdfButton.innerHTML = originalButtonText;
+                downloadPdfButton.disabled = false;
+            }).catch(err => {
+                console.error("Error generating PDF:", err);
+                downloadPdfButton.innerHTML = "Error al generar PDF";
+                setTimeout(() => {
+                    downloadPdfButton.innerHTML = originalButtonText;
+                    downloadPdfButton.disabled = false;
+                }, 3000);
+            });
+        });
+
+        generateAiSuggestionsButton.addEventListener('click', async function() {
+            aiSuggestionsOutput.classList.remove('hidden');
+            aiLoadingSpinner.classList.remove('hidden');
+            aiSuggestionsList.innerHTML = '';
+
+            const teacherFullName = currentTeacherInfo.name.toUpperCase();
+            aiSuggestionsTitle.textContent = `${teacherFullName} este es tu Plan de Desarrollo en Competencias Digitales Personalizado`;
+
+            let promptText = "Eres un experto en el marco DigCompEdu. Un docente ha realizado un test y sus resultados de competencia digital por área (en una escala de 1 a 5, donde 1 es el más bajo y 5 el más alto) son los siguientes:\n\n";
+            const areasToImprove = [];
+            for (const areaName in currentAreaNumericalScores) {
+                const { level, score } = currentAreaNumericalScores[areaName];
+                promptText += `- ${areaName}: Nivel DigCompEdu ${level} (Puntaje Promedio ${score.toFixed(1)}/5)\n`;
+                if (score <= 3.5) {
+                    areasToImprove.push({ area: areaName, level_achieved: level, score: score.toFixed(1) });
+                }
+            }
+
+            if (areasToImprove.length === 0) {
+                aiSuggestionsList.innerHTML = '<p class="text-gray-700">Parece que ya tienes un buen nivel en todas las áreas. ¡Excelente trabajo! No se requieren sugerencias de mejora específicas en este momento.</p>';
+                downloadAiPlanButton.classList.add('hidden');
+                aiLoadingSpinner.classList.add('hidden');
+                return;
+            }
+
+            promptText += "\nPor favor, proporciona un breve plan de desarrollo profesional personalizado para este docente, centrándote especialmente en las áreas donde tiene un puntaje promedio de 3.5 o inferior. Para cada área, incluye sugerencias de recursos (ej. plataformas, tipos de actividades) y pasos concretos para mejorar. El plan debe ser conciso y motivador. Responde en formato JSON, como un array de objetos con las propiedades 'area', 'level_achieved' y 'suggestion'. Si un área no requiere mejora significativa (puntaje > 3.5), no la incluyas en la respuesta JSON.";
+
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: promptText }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: { "area": { "type": "STRING" }, "level_achieved": { "type": "STRING" }, "suggestion": { "type": "STRING" } },
+                            "propertyOrdering": ["area", "level_achieved", "suggestion"]
+                        }
+                    }
+                }
+            };
+
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates[0]?.content?.parts?.[0]) {
+                    const parsedJson = JSON.parse(result.candidates[0].content.parts[0].text);
+                    lastGeneratedAiPlan = '';
+                    if (parsedJson.length > 0) {
+                        aiSuggestionsList.innerHTML = '';
+                        let planTextContent = `Plan de Desarrollo en Competencias Digitales Personalizado para ${currentTeacherInfo.name.toUpperCase()}:\n\n`;
+                        parsedJson.forEach(item => {
+                            const suggestionCard = `<div class="ai-suggestion-card"><h4 class="font-semibold text-md text-gray-800 mb-1">${item.area} (Nivel ${item.level_achieved}):</h4><p class="text-gray-700">${item.suggestion}</p></div>`;
+                            aiSuggestionsList.innerHTML += suggestionCard;
+                            planTextContent += `${item.area} (Nivel ${item.level_achieved}):\n- ${item.suggestion}\n\n`;
+                        });
+                        lastGeneratedAiPlan = planTextContent;
+                        downloadAiPlanButton.classList.remove('hidden');
+                    } else {
+                        aiSuggestionsList.innerHTML = '<p class="text-gray-700">Parece que ya tienes un buen nivel en todas las áreas. ¡Excelente trabajo! No se requieren sugerencias de mejora específicas en este momento.</p>';
+                        downloadAiPlanButton.classList.add('hidden');
+                    }
+                } else {
+                    aiSuggestionsList.innerHTML = '<p class="text-red-600">Lo siento, no pude generar sugerencias en este momento. Por favor, inténtalo de nuevo.</p>';
+                    downloadAiPlanButton.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                aiSuggestionsList.innerHTML = '<p class="text-red-600">Hubo un error al conectar con la IA. Por favor, revisa tu conexión a internet o inténtalo más tarde.</p>';
+                downloadAiPlanButton.classList.add('hidden');
+            } finally {
+                aiLoadingSpinner.classList.add('hidden');
+            }
+        });
+
+        downloadAiPlanButton.addEventListener('click', function() {
+            if (lastGeneratedAiPlan) {
+                const blob = new Blob([lastGeneratedAiPlan], { type: 'text/plain;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const fileName = currentTeacherInfo.name.trim().toLowerCase().replace(/\s+/g, '_');
+                link.setAttribute('download', `${fileName}_plan_desarrollo_competencias_digitales.txt`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        });
+
+        function removeHighlights() {
+            teacherNameInput.classList.remove('highlight-missing');
+            sedeSelect.classList.remove('highlight-missing');
+            nivelAreaSelect.classList.remove('highlight-missing');
+            document.querySelectorAll('.question-card[data-question-id]').forEach(card => card.classList.remove('highlight-missing'));
+        }
+
+        function resetForm() {
+            form.reset();
+            resultsDiv.classList.add('hidden');
+            aiSuggestionsOutput.classList.add('hidden');
+            if (digCompEduChart) {
+                digCompEduChart.destroy();
+            }
+            currentAreaNumericalScores = {};
+            finalOverallResult = {};
+            currentTeacherInfo = {};
+            lastGeneratedAiPlan = '';
+            downloadAiPlanButton.classList.add('hidden');
+            removeHighlights();
+            generateAiSuggestionsButton.textContent = `Generar Planes de Desarrollo Personalizado ✨`;
+        }
+
+        function showModal(missingQuestions) {
+            let message = "<p class='mb-4'>Por favor, asegúrate de llenar todos los campos obligatorios y responder todas las preguntas antes de calcular tus resultados:</p><ul>";
+            missingQuestions.forEach(qId => { message += `<li>${qId}</li>`; });
+            message += "</ul>";
+            missingQuestionsListModal.innerHTML = message;
+            warningModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            warningModal.style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target == warningModal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
